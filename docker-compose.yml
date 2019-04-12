@@ -18,7 +18,12 @@ services:
     #  - AWS_SECRET_ACCESS_KEY=XXXX
     #  - WALE_S3_PREFIX=s3://BUCKET_NAME/PATH
     #  - AWS_REGION=us-east-1
-
+    networks:
+        - backend
+    logging:
+        driver: json-file
+        options:
+          max-size: 5M
   app:
     build:
       context: app
@@ -42,6 +47,12 @@ services:
       - MM_DBNAME=mattermost
       # in case your config is not in default location
       #- MM_CONFIG=/mattermost/config/config.json
+    networks:
+        - backend
+    logging:
+        driver: json-file
+        options:
+          max-size: 5M
 
   web:
     build: web
@@ -57,3 +68,21 @@ services:
     # Uncomment for SSL
     # environment:
     #  - MATTERMOST_ENABLE_SSL=true
+    environment:
+        - VIRTUAL_HOST=slack.zotabox.net
+        - HTTPS_METHOD=noredirect
+        - CERT_NAME=shared
+    networks:
+        - backend
+        - zotabox
+        
+    logging:
+        driver: json-file
+        options:
+          max-size: 5M
+          
+networks:
+  zotabox:
+    external: true
+  backend:
+    driver: bridge
